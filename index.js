@@ -28,6 +28,13 @@ app.get('/', (request,response) => {
     response.send('<h1>Welcome to Phonebook App</h1>')
 })
 
+app.get('/info', (request,response) => {
+    let entries = persons.length
+    let currentDate = new Date().toDateString()
+    let currentTime = new Date().toTimeString()
+    response.send(`<div>Phonebook has info for ${entries} entries<br/><br/>${currentDate} ${currentTime}`)
+})
+
 app.get('/api/persons', (request,response) => {
     response.json(persons)
 })
