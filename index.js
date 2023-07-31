@@ -3,7 +3,20 @@ const morgan = require('morgan')
 const app = express()
 
 app.use(express.json())
-app.use(morgan('tiny',':method :url :status :res[content-length] - :response-time ms'))
+morgan.token('request-data', function getRequestData(tokens, req, res) {
+  let data = ''
+  if (req.method === 'POST') data=JSON.stringify(req.body)
+  return [
+    tokens.method(req, res),
+    tokens.url(req, res),
+    tokens.status(req, res),
+    tokens.res(req, res, 'content-length'), '-',
+    tokens['response-time'](req, res), 'ms',
+    data
+  ].join(' ')
+})
+// app.use(morgan('tiny',':method :url :status :res[content-length] - :response-time ms'))
+app.use(morgan('request-data'))
 
 let persons = [
     { 
@@ -67,7 +80,6 @@ const getRandomId = (max) => {
 
 app.post('/api/persons', (request, response) => {
   const body = request.body
-  console.log(body)
 
   if(!body.name || !body.number) {
     return response.status(400).json({
