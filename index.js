@@ -7,9 +7,9 @@ morgan.token('request-data', function getRequestData(tokens, req, res) {
   let data = ''
   if (req.method === 'POST') data=JSON.stringify(req.body)
   return [
-    tokens.method(req, res),
-    tokens.url(req, res),
-    tokens.status(req, res),
+    req.method,
+    req.url,
+    req.status,
     tokens.res(req, res, 'content-length'), '-',
     tokens['response-time'](req, res), 'ms',
     data
