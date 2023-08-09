@@ -76,10 +76,6 @@ app.delete('/api/persons/:id', (request, response) => {
   response.status(204).end()
 })
 
-const getRandomId = (max) => {
-  return Math.floor(Math.random() * max)
-}
-
 app.post('/api/persons', (request, response) => {
   const body = request.body
 
@@ -96,10 +92,12 @@ app.post('/api/persons', (request, response) => {
     }
   }
 
-  const person = {...body, "id": getRandomId(100)}
+  const person = new Person({
+    name: body.name,
+    number: body.number
+  })
 
-  persons = persons.concat(person)
-  return response.json(person)
+  person.save().then(savedPerson => response.json(savedPerson))
 })
 
 const PORT= process.env.PORT || 3000
