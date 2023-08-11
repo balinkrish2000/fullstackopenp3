@@ -3,6 +3,7 @@ const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
 const Person = require('./models/person')
+const { default: mongoose } = require('mongoose')
 const app = express()
 
 app.use(cors())
@@ -70,6 +71,9 @@ app.get('/api/persons/:id', (request,response) => {
 })
 
 app.delete('/api/persons/:id', (request, response) => {
+  Person.findByIdAndRemove(request.params.id)
+    .then(result => response.status(204).end())
+    .catch(error => response.status(404).send({error: 'malformatted Id'}))
   const id = Number(request.params.id)
   persons = persons.filter(person => person.id !== id)
 
