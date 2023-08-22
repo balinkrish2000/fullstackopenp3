@@ -24,6 +24,8 @@ morgan.token('request-data', function getRequestData(tokens, req, res) {
 
 app.use(morgan('request-data'))
 
+let persons = []
+
 app.get('/', (request,response) => {
     response.send('<h1>Welcome to Phonebook App</h1>')
 })
@@ -65,13 +67,6 @@ app.post('/api/persons', (request, response) => {
     return response.status(400).json({
       error: 'name and number required. Either one or both missing'
     })
-  } else
-  {
-    if (persons.find(person => person.name.toLowerCase() === body.name.toLowerCase())) {
-      return response.status(400).json({
-        error: 'name must be unique'
-      })
-    }
   }
 
   const person = new Person({
@@ -80,6 +75,21 @@ app.post('/api/persons', (request, response) => {
   })
 
   person.save().then(savedPerson => response.json(savedPerson))
+})
+
+app.put('/api/persons/:id', (request, response, next) => {
+  const body = request.body
+
+  const person = {
+    name: body.name,
+    number: body.number
+  }
+
+  Person.findByIdAndUpdate(request.params.id, person, {new: true})
+    .then(updatedPerson => {
+      response.json(updatedPerson)
+    })
+    .catch(error => next(error))
 })
 
 const unknownEndPoint = (request, response) => {
