@@ -21,31 +21,8 @@ morgan.token('request-data', function getRequestData(tokens, req, res) {
     data
   ].join(' ')
 })
-// app.use(morgan('tiny',':method :url :status :res[content-length] - :response-time ms'))
-app.use(morgan('request-data'))
 
-let persons = [
-    { 
-      "id": 1,
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": 2,
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": 3,
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": 4,
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
-    }
-]
+app.use(morgan('request-data'))
 
 app.get('/', (request,response) => {
     response.send('<h1>Welcome to Phonebook App</h1>')
@@ -58,16 +35,21 @@ app.get('/info', (request,response) => {
     response.send(`<div>Phonebook has info for ${entries} entries<br/><br/>${currentDate} ${currentTime}`)
 })
 
-app.get('/api/persons', (request,response) => {
+app.get('/api/persons', (request,response, next) => {
     Person.find({}).then(persons => response.json(persons))
 })
 
-app.get('/api/persons/:id', (request,response) => {
+app.get('/api/persons/:id', (request,response, next) => {
   Person.findById(request.params.id)
-    .then(person => response.json(person))
-    .catch(error => response.status(404).json({
-      error: 'id not found'
-    }))
+    .then( person => {
+      if (person) {
+        person => response.json(person)
+      }
+      else {
+        response.status(404).end()
+      }
+    })
+    .catch(error => next(error))
 })
 
 app.delete('/api/persons/:id', (request, response, next) => {
@@ -99,6 +81,12 @@ app.post('/api/persons', (request, response) => {
 
   person.save().then(savedPerson => response.json(savedPerson))
 })
+
+const unknownEndPoint = (request, response) => {
+  response.status(404).send({error: "Unknown Endpoint"})
+}
+
+app.use(unknownEndPoint)
 
 const errorHandler = (error, request, response, next) => {
   console.log(error.message)
